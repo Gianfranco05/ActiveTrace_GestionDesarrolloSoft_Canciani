@@ -13,3 +13,6 @@ class UsuarioRepository(BaseRepository[Usuario]):
 
     async def get_by_legajo(self, legajo: str):
         return await self.get_by(field_name="legajo", value=legajo)
+
+    def __init__(self, session, tenant_id):
+        super().__init__(session, tenant_id, Usuario)

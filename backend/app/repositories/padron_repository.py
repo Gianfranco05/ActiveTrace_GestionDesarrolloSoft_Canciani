@@ -3,6 +3,9 @@ from app.models.padron import VersionPadron, EntradaPadron
 
 
 class PadronRepository(BaseRepository[VersionPadron]):
+    def __init__(self, session, tenant_id):
+        super().__init__(session, tenant_id, VersionPadron)
+
     async def create_version(self, payload):
         return await self.create(payload)
 
