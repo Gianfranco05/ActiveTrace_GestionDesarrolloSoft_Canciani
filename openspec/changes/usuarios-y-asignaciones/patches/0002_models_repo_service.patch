@@ -1,0 +1,11 @@
+*** Begin Patch
+*** Add File: backend/app/repositories/usuario_repository.py
+"""Simple UsuarioRepository scaffold to support tests and services."""
+from app.repositories.base import BaseRepository
+from app.models.usuario import Usuario
+
+
+class UsuarioRepository(BaseRepository[Usuario]):
+    pass
+
+*** End Patch

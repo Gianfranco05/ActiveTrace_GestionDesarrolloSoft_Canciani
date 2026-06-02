@@ -1,0 +1,9 @@
+*** Begin Patch
+*** Update File: backend/app/services/usuario_service.py
+@@
+ -        return await self._repo.create(data)
+ +        # attach id to usuario payload to satisfy FK PK
+ +        data["id"] = auth_user_id
+ +        return await self._repo.create(data)
+
+*** End Patch

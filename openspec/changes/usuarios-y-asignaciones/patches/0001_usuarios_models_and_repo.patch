@@ -1,0 +1,9 @@
+*** Begin Patch
+*** Add File: backend/app/models/usuario.py
++"""
+Placeholder: Usuario model scaffold
+"""
+
+# Real implementation will be done during apply with tests
+
+*** End Patch
