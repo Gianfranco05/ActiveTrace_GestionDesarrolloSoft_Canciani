@@ -1,0 +1,14 @@
+--- a/backend/alembic/versions/006_usuarios_asignaciones.py
++++ b/backend/alembic/versions/006_usuarios_asignaciones.py
+@@
+-        sa.Column("nombre", sa.String(100), nullable=False),
+-        sa.Column("apellidos", sa.String(100), nullable=False),
+-        sa.Column("dni", sa.Text(), nullable=False),
+-        sa.Column("cuil", sa.Text(), nullable=False),
++        sa.Column("nombre", sa.String(120), nullable=False),
++        sa.Column("apellidos", sa.String(120), nullable=False),
++        sa.Column("dni", sa.Text(), nullable=True),
++        sa.Column("cuil", sa.Text(), nullable=True),
+@@
++        sa.Column("vig_desde", sa.DateTime(timezone=True), nullable=False),
++        sa.Column("vig_hasta", sa.DateTime(timezone=True), nullable=True),
