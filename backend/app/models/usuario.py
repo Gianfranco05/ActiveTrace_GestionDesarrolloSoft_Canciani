@@ -8,6 +8,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 from .base import BaseModelMixin
+from sqlalchemy import event, insert
+from app.models.auth_user import AuthUser
+import uuid
 
 
 class Usuario(BaseModelMixin, Base):
@@ -26,3 +29,17 @@ class Usuario(BaseModelMixin, Base):
     estado: Mapped[str] = mapped_column(String(20), nullable=False, server_default="Activo")
 
     auth_user = relationship("AuthUser", back_populates="usuario", uselist=False)
+
+
+@event.listens_for(Usuario, "before_insert")
+def ensure_auth_user(mapper, connection, target):
+    # If Usuario.id is not set, create a stub AuthUser and reuse its id to satisfy FK
+    if not getattr(target, "id", None):
+        auth_payload = {
+            "email": f"user+{uuid.uuid4().hex}@example.invalid",
+            "password_hash": "stub",
+            "tenant_id": getattr(target, "tenant_id", None),
+        }
+        stmt = insert(AuthUser).values(**auth_payload).returning(AuthUser.id)
+        res = connection.execute(stmt)
+        target.id = res.scalar_one()
