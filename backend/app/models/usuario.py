@@ -13,7 +13,7 @@ from .base import BaseModelMixin
 class Usuario(BaseModelMixin, Base):
     __tablename__ = "usuario"
 
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(ForeignKey("auth_user.id", ondelete="CASCADE"), primary_key=True)
     nombre: Mapped[str] = mapped_column(String(120), nullable=False)
     apellidos: Mapped[str] = mapped_column(String(120), nullable=False)
     dni: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
