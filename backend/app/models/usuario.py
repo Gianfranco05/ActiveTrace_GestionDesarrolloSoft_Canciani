@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Optional
 import uuid
 
-from sqlalchemy import String, Text
+from sqlalchemy import String, Text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
