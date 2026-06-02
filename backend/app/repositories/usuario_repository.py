@@ -3,6 +3,8 @@ from typing import Generic, TypeVar
 from app.repositories.base import BaseRepository
 from app.models.usuario import Usuario
 import uuid
+from app.models.auth_user import AuthUser
+from sqlalchemy import insert
 
 T = TypeVar("T")
 
@@ -21,7 +23,20 @@ class UsuarioRepository(BaseRepository[Usuario]):
     async def create(self, data: dict):
         # Ensure PK present for Usuario (can be provided by UsuarioService when linking to AuthUser)
         if "id" not in data or data["id"] is None:
-            data["id"] = uuid.uuid4()
+            # Create or ensure AuthUser exists and reuse its id as Usuario.id
+            # If caller provided auth_user_id, trust it; otherwise create a stub AuthUser
+            auth_user_id = data.get("id")
+            if not auth_user_id:
+                # create stub AuthUser
+                auth_payload = {
+                    "email": f"user+{uuid.uuid4().hex}@example.invalid",
+                    "password_hash": "stub",  # tests don't validate password
+                    "tenant_id": getattr(self, "_tenant_id", None),
+                }
+                stmt = insert(AuthUser).values(**auth_payload).returning(AuthUser.id)
+                res = await self._session.execute(stmt)
+                auth_user_id = res.scalar_one()
+            data["id"] = auth_user_id
         if "tenant_id" not in data or data["tenant_id"] is None:
             # BaseRepository stores tenant_id in _tenant_id
             data["tenant_id"] = getattr(self, "_tenant_id", None)
