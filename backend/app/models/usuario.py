@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from typing import Optional
+import uuid
 
-from sqlalchemy import String, Text, ForeignKey
+from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -12,7 +13,7 @@ from .base import BaseModelMixin
 class Usuario(BaseModelMixin, Base):
     __tablename__ = "usuario"
 
-    id: Mapped[Optional[str]] = mapped_column(ForeignKey("auth_user.id"), primary_key=True)
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     nombre: Mapped[str] = mapped_column(String(120), nullable=False)
     apellidos: Mapped[str] = mapped_column(String(120), nullable=False)
     dni: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
