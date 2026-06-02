@@ -21,6 +21,7 @@ class UsuarioService:
             tenant_id = tenant_or_db
             self._repo = UsuarioRepository(session, tenant_id)
             self._db = session
+            self._tenant_id = tenant_id
 
     async def create(self, data: Any):
         # accept Pydantic model or dict
@@ -34,7 +35,7 @@ class UsuarioService:
         auth_user_id = data.pop("auth_user_id", None)
         if auth_user_id is None:
             # create minimal auth user via AuthRepository
-            auth_repo = AuthRepository(self._db, self._db)
+            auth_repo = AuthRepository(self._db, self._tenant_id)
             auth_payload = {
                 "email": data.get("email", f"no-reply+{self._db}@local"),
                 "password_hash": "",
@@ -42,7 +43,7 @@ class UsuarioService:
             auth = await auth_repo.create(auth_payload)
             auth_user_id = auth.id
         else:
-            auth_repo = AuthRepository(self._db, self._db)
+            auth_repo = AuthRepository(self._db, self._tenant_id)
             auth = await auth_repo.get(auth_user_id)
             if auth is None:
                 raise ValueError("auth_user_id does not exist")
