@@ -20,7 +20,9 @@ class Usuario(BaseModelMixin, Base):
     cuil: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     cbu: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     alias_cbu: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    facturador: Mapped[str] = mapped_column(String(20), nullable=False, server_default="false")
+    from sqlalchemy import Boolean
+
+    facturador: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
     estado: Mapped[str] = mapped_column(String(20), nullable=False, server_default="Activo")
 
     auth_user = relationship("AuthUser", back_populates="usuario", uselist=False)
