@@ -5,10 +5,11 @@ from typing import Optional
 from sqlalchemy import DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.database import Base
 from .base import BaseModelMixin
 
 
-class Asignacion(BaseModelMixin):
+class Asignacion(BaseModelMixin, Base):
     __tablename__ = "asignacion"
 
     usuario_id: Mapped[Optional[str]] = mapped_column(ForeignKey("usuario.id"), nullable=False)

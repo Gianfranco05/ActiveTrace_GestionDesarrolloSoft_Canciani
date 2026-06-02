@@ -5,10 +5,11 @@ from typing import Optional
 from sqlalchemy import Boolean, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.database import Base
 from .base import BaseModelMixin
 
 
-class VersionPadron(BaseModelMixin):
+class VersionPadron(BaseModelMixin, Base):
     __tablename__ = "version_padron"
 
     materia_id: Mapped[str] = mapped_column(ForeignKey("materia.id"), nullable=False)
@@ -16,7 +17,7 @@ class VersionPadron(BaseModelMixin):
     activa: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
 
 
-class EntradaPadron(BaseModelMixin):
+class EntradaPadron(BaseModelMixin, Base):
     __tablename__ = "entrada_padron"
 
     version_id: Mapped[str] = mapped_column(ForeignKey("version_padron.id"), nullable=False)

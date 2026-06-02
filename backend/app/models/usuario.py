@@ -5,10 +5,11 @@ from typing import Optional
 from sqlalchemy import String, Text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.database import Base
 from .base import BaseModelMixin
 
 
-class Usuario(BaseModelMixin):
+class Usuario(BaseModelMixin, Base):
     __tablename__ = "usuario"
 
     id: Mapped[Optional[str]] = mapped_column(ForeignKey("auth_user.id"), primary_key=True)
