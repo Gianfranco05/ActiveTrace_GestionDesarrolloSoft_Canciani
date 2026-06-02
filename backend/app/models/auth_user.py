@@ -27,6 +27,10 @@ class AuthUser(BaseModelMixin, Base):
         ),
     )
 
+    # One-to-one relationship to Usuario profile (defined in usuarios change)
+    # back_populates kept in sync with Usuario.auth_user
+    usuario = relationship("Usuario", back_populates="auth_user", uselist=False)
+
 
 class RefreshToken(Base):
     __tablename__ = "refresh_token"
