@@ -1,3 +1,7 @@
+from datetime import date
+
+from sqlalchemy import select, or_
+
 from app.repositories.base import BaseRepository
 from app.models.asignacion import Asignacion
 
@@ -10,5 +14,16 @@ class AsignacionRepository(BaseRepository[Asignacion]):
         return await self.list(usuario_id=usuario_id)
 
     async def get_activas_by_usuario(self, usuario_id):
-        # simplistic filter; real implementation should check vigencia
-        return await self.list(usuario_id=usuario_id)
+        today = date.today()
+        query = select(Asignacion).where(
+            Asignacion.tenant_id == self._tenant_id,
+            Asignacion.usuario_id == usuario_id,
+            Asignacion.vig_desde <= today,
+            Asignacion.deleted_at.is_(None),
+            or_(
+                Asignacion.vig_hasta.is_(None),
+                Asignacion.vig_hasta >= today,
+            ),
+        )
+        result = await self._session.execute(query)
+        return list(result.scalars().all())

@@ -1,4 +1,6 @@
-from typing import TypeVar
+from typing import TypeVar, Optional
+
+from sqlalchemy import select
 
 from app.repositories.base import BaseRepository
 from app.models.usuario import Usuario
@@ -14,8 +16,14 @@ class UsuarioRepository(BaseRepository[Usuario]):
     Additional helpers can be added here (get_by_legajo, get_by_cuil, etc.).
     """
 
-    async def get_by_legajo(self, legajo: str):
-        return await self.get_by(field_name="legajo", value=legajo)
+    async def get_by_legajo(self, legajo: str) -> Optional[Usuario]:
+        query = select(Usuario).where(
+            Usuario.tenant_id == self._tenant_id,
+            Usuario.legajo == legajo,
+            Usuario.deleted_at.is_(None),
+        )
+        result = await self._session.execute(query)
+        return result.scalar_one_or_none()
 
     def __init__(self, session, tenant_id):
         super().__init__(session, tenant_id, Usuario)
