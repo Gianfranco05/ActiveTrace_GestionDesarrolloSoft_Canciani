@@ -9,8 +9,12 @@ class PadronRepository(BaseRepository[VersionPadron]):
     async def create_version(self, payload):
         return await self.create(payload)
 
+    async def create_entry(self, version_id, data):
+        entry = EntradaPadron(tenant_id=self._tenant_id, version_id=version_id, **data)
+        self._session.add(entry)
+        await self._session.commit()
+        await self._session.refresh(entry)
+        return entry
+
     async def create_entries(self, version_id, entries):
-        # bulk create EntradaPadron
-        items = [dict(version_id=version_id, **e) for e in entries]
-        # delegate to base implementation if exists
-        return await self._session.execute(self._model_class.__table__.insert(), items)
+        return [await self.create_entry(version_id, e) for e in entries]

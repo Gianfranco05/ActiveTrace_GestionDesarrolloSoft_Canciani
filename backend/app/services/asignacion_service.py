@@ -4,7 +4,7 @@ import uuid
 from datetime import date, datetime
 
 from fastapi import HTTPException
-from sqlalchemy import and_, select
+from sqlalchemy import select
 
 from app.models.asignacion import Asignacion
 from app.repositories.asignacion_repository import AsignacionRepository

@@ -1,7 +1,6 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.usuario_repository import UsuarioRepository
 from app.repositories.auth_repository import AuthRepository
-from app.core.security import encrypt_or_none, decrypt_or_none
+from app.core.security import encrypt_or_none, decrypt_or_none, hash_password
 import uuid
 from typing import Any
 
@@ -15,6 +14,8 @@ class UsuarioService:
             # first arg is a repository instance
             self._repo = repo_or_session
             self._db = tenant_or_db
+            # try to obtain tenant_id from repo when available (repo stores _tenant_id)
+            self._tenant_id = getattr(self._repo, '_tenant_id', None)
         else:
             # assume (session, tenant_id)
             session = repo_or_session
@@ -35,10 +36,13 @@ class UsuarioService:
         auth_user_id = data.pop("auth_user_id", None)
         if auth_user_id is None:
             # create minimal auth user via AuthRepository
+            # ensure tenant_id available for auth creation: prefer explicit, then repo
+            self._tenant_id = self._tenant_id or data.get("tenant_id") or getattr(self._repo, '_tenant_id', None)
             auth_repo = AuthRepository(self._db, self._tenant_id)
+            password = data.pop("password", None)
             auth_payload = {
-                "email": data.get("email", f"no-reply+{self._db}@local"),
-                "password_hash": "",
+                "email": data.pop("email", f"no-reply+{self._db}@local"),
+                "password_hash": hash_password(password) if password else "",
             }
             auth = await auth_repo.create(auth_payload)
             auth_user_id = auth.id

@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 from app.repositories.base import BaseRepository
 from app.models.usuario import Usuario
@@ -31,6 +31,7 @@ class UsuarioRepository(BaseRepository[Usuario]):
                 auth_payload = {
                     "email": f"user+{uuid.uuid4().hex}@example.invalid",
                     "password_hash": "stub",  # tests don't validate password
+                    # Ensure tenant_id is set for AuthUser creation
                     "tenant_id": getattr(self, "_tenant_id", None),
                 }
                 stmt = insert(AuthUser).values(**auth_payload).returning(AuthUser.id)

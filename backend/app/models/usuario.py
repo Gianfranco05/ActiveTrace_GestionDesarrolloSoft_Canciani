@@ -10,7 +10,6 @@ from app.core.database import Base
 from .base import BaseModelMixin
 from sqlalchemy import event, insert
 from app.models.auth_user import AuthUser
-import uuid
 
 
 class Usuario(BaseModelMixin, Base):
@@ -23,6 +22,10 @@ class Usuario(BaseModelMixin, Base):
     cuil: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     cbu: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     alias_cbu: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    banco: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    regional: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    legajo: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    legajo_profesional: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
     from sqlalchemy import Boolean
 
     facturador: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")

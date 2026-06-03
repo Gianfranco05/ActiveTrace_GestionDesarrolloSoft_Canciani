@@ -1,7 +1,7 @@
 """TDD: AsignacionService — overlap enforcement."""
 
 import uuid
-from datetime import date, timedelta
+from datetime import date
 
 import pytest
 
