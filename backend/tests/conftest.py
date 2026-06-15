@@ -136,34 +136,36 @@ async def db_tables(db_engine):
         await conn.run_sync(db.Base.metadata.drop_all)
 
 
+async def _get_or_create_tenant(name: str, slug: str) -> Tenant:
+    """Idempotent tenant creation — returns existing tenant if present."""
+    async with db.session_factory() as session:
+        result = await session.execute(
+            sa.select(Tenant).where(Tenant.name == name)
+        )
+        t = result.scalar_one_or_none()
+        if t is None:
+            t = Tenant(name=name, slug=slug)
+            session.add(t)
+            await session.commit()
+            await session.refresh(t)
+        else:
+            await session.refresh(t)
+        return t
+
+
 @pytest_asyncio.fixture(scope="session")
 async def tenant(db_tables) -> Tenant:
-    async with db.session_factory() as session:
-        t = Tenant(name="Test Tenant", slug="test-tenant")
-        session.add(t)
-        await session.commit()
-        await session.refresh(t)
-        return t
+    return await _get_or_create_tenant("Test Tenant", "test-tenant")
 
 
 @pytest_asyncio.fixture(scope="session")
 async def tenant_a(db_tables) -> Tenant:
-    async with db.session_factory() as session:
-        t = Tenant(name="Tenant A", slug="tenant-a")
-        session.add(t)
-        await session.commit()
-        await session.refresh(t)
-        return t
+    return await _get_or_create_tenant("Tenant A", "tenant-a")
 
 
 @pytest_asyncio.fixture(scope="session")
 async def tenant_b(db_tables) -> Tenant:
-    async with db.session_factory() as session:
-        t = Tenant(name="Tenant B", slug="tenant-b")
-        session.add(t)
-        await session.commit()
-        await session.refresh(t)
-        return t
+    return await _get_or_create_tenant("Tenant B", "tenant-b")
 
 
 @pytest_asyncio.fixture
@@ -196,9 +198,9 @@ async def db_session(db_tables) -> AsyncSession:
         except Exception:
             # Fallback: DELETE row-by-row (slower but works on SQLite).
             # Multiple passes to handle FK ordering: child tables must be
-            # emptied before their parent tables.
+            # emptied before their parent tables. 5 passes covers deep FK chains.
             remaining = list(_all_tables)
-            for _pass in range(3):
+            for _pass in range(5):
                 if not remaining:
                     break
                 still_failing = []
@@ -208,5 +210,14 @@ async def db_session(db_tables) -> AsyncSession:
                     except Exception:
                         still_failing.append(table)
                 remaining = still_failing
+            # Last resort: disable FK checks, delete everything, re-enable
+            if remaining:
+                await conn.execute(sa.text("PRAGMA foreign_keys=OFF"))
+                for table in remaining:
+                    try:
+                        await conn.execute(sa.text(f"DELETE FROM {table}"))
+                    except Exception:
+                        pass
+                await conn.execute(sa.text("PRAGMA foreign_keys=ON"))
 
 

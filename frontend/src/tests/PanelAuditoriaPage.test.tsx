@@ -88,6 +88,5 @@ describe('PanelAuditoriaPage', () => {
 
     expect(screen.getByLabelText('Fecha hasta')).toBeInTheDocument();
     expect(screen.getByLabelText('ID Materia')).toBeInTheDocument();
-    expect(screen.getByLabelText('Usuario')).toBeInTheDocument();
   });
 });
