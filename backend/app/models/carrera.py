@@ -1,4 +1,4 @@
-from sqlalchemy import Index, String, UniqueConstraint
+from sqlalchemy import Index, String, UniqueConstraint, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -19,6 +19,6 @@ class Carrera(BaseModelMixin, Base):
             "tenant_id",
             "codigo",
             unique=True,
-            postgresql_where=BaseModelMixin.deleted_at.is_(None),
+            postgresql_where=text("deleted_at IS NULL"),
         ),
     )

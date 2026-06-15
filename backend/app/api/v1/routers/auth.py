@@ -1,15 +1,19 @@
+import logging
 import uuid
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_db
+from app.core.dependencies import UserSession, get_current_user, get_db
 from app.core.rate_limiter import RateLimiter
+
+logger = logging.getLogger(__name__)
 from app.repositories.auth_repository import (
     AuthRepository,
     RefreshTokenRepository,
     ResetTokenRepository,
 )
+from app.repositories.rbac_repository import RbacRepository
 from app.schemas.auth import (
     ForgotRequest,
     ForgotResponse,
@@ -17,6 +21,7 @@ from app.schemas.auth import (
     LoginRequest,
     LoginResponse,
     LogoutRequest,
+    MeResponse,
     RefreshRequest,
     RefreshResponse,
     ResetRequest,
@@ -27,6 +32,38 @@ from app.services.role_resolver import RoleResolver
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 _rate_limiter = RateLimiter()
+logger.warning(
+    "RateLimiter usando diccionario en memoria. "
+    "En producción con múltiples réplicas, reemplazar con Redis. "
+    "El estado se pierde en cada restart."
+)
+
+
+@router.get("/me", response_model=MeResponse)
+async def get_me(
+    current_user: UserSession = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.auth_user import AuthUser
+    from app.models.usuario import Usuario
+
+    auth_user = await db.get(AuthUser, current_user.user_id)
+    if not auth_user:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="User not found")
+
+    usuario = await db.get(Usuario, current_user.user_id)
+    effective = await RbacRepository.get_effective_permissions(db, current_user.roles)
+
+    return MeResponse(
+        id=str(current_user.user_id),
+        email=auth_user.email,
+        tenant_id=str(current_user.tenant_id),
+        nombre=usuario.nombre if usuario else "",
+        apellidos=usuario.apellidos if usuario else "",
+        roles=current_user.roles,
+        permissions=effective,
+    )
 
 
 async def _get_auth_service(

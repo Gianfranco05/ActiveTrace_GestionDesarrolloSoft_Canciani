@@ -61,28 +61,30 @@ Cada rol agrupa un conjunto de permisos. Los permisos efectivos de un usuario so
 
 > La matriz se expresa por **capacidad de negocio**, no por pantalla ni ruta, para que sea implementable en cualquier arquitectura. `✅` = el rol tiene la capacidad; `—` = no la tiene; `(propio)` = solo sobre sus propios datos, no los de otros usuarios.
 
-| Capacidad / Módulo | ALUMNO | TUTOR | PROFESOR | COORDINADOR | ADMIN | FINANZAS |
-|--------------------|:------:|:-----:|:--------:|:-----------:|:-----:|:--------:|
-| Ver estado académico propio | ✅ | — | — | — | — | — |
-| Reservar instancia de evaluación | ✅ | — | — | — | — | — |
-| Confirmar avisos (acknowledgment) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Importar calificaciones | — | — | ✅ (propio) | ✅ | ✅ | — |
-| Ver alumnos atrasados | — | ✅ | ✅ (propio) | ✅ | ✅ | — |
-| Detectar entregas sin corregir | — | ✅ | ✅ (propio) | ✅ | ✅ | — |
-| Enviar comunicaciones a alumnos | — | — | ✅ (propio) | ✅ | ✅ | — |
-| Aprobar comunicaciones masivas | — | — | — | ✅ | ✅ | — |
-| Gestionar encuentros | — | ✅ | ✅ (propio) | ✅ | ✅ | — |
-| Registrar guardias | — | ✅ (propio) | ✅ (propio) | ✅ | ✅ | — |
-| Gestionar tareas internas | — | — | ✅ (propio) | ✅ | ✅ | — |
-| Publicar avisos | — | — | — | ✅ | ✅ | — |
-| Gestionar equipos docentes (asignaciones) | — | — | — | ✅ | ✅ | — |
-| Gestionar estructura académica (carreras, cohortes, materias) | — | — | — | — | ✅ | — |
-| Gestionar usuarios del tenant | — | — | — | — | ✅ | — |
-| Ver auditoría | — | — | — | ✅ (propio) | ✅ | ✅ |
-| Operar grilla salarial | — | — | — | — | — | ✅ |
-| Calcular / cerrar liquidaciones | — | — | — | — | — | ✅ |
-| Gestionar facturas | — | — | — | — | — | ✅ |
-| Configurar el tenant | — | — | — | — | ✅ | — |
+| Capacidad / Módulo | ALUMNO | TUTOR | PROFESOR | COORDINADOR | NEXO | ADMIN | FINANZAS |
+|--------------------|:------:|:-----:|:--------:|:-----------:|:----:|:-----:|:--------:|
+| Ver estado académico propio | ✅ | — | — | — | — | — | — |
+| Reservar instancia de evaluación | ✅ | — | — | — | — | — | — |
+| Confirmar avisos (acknowledgment) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Importar calificaciones | — | — | ✅ (propio) | ✅ | — | ✅ | — |
+| Ver alumnos atrasados | — | ✅ | ✅ (propio) | ✅ | ✅ (propio) | ✅ | — |
+| Detectar entregas sin corregir | — | ✅ | ✅ (propio) | ✅ | — | ✅ | — |
+| Enviar comunicaciones a alumnos | — | — | ✅ (propio) | ✅ | — | ✅ | — |
+| Aprobar comunicaciones masivas | — | — | — | ✅ | — | ✅ | — |
+| Gestionar encuentros | — | ✅ | ✅ (propio) | ✅ | ✅ (propio) | ✅ | — |
+| Registrar guardias | — | ✅ (propio) | ✅ (propio) | ✅ | ✅ (propio) | ✅ | — |
+| Gestionar tareas internas | — | — | ✅ (propio) | ✅ | — | ✅ | — |
+| Publicar avisos | — | — | — | ✅ | — | ✅ | — |
+| Gestionar equipos docentes (asignaciones) | — | — | — | ✅ | — | ✅ | — |
+| Gestionar estructura académica (carreras, cohortes, materias) | — | — | — | — | — | ✅ | — |
+| Gestionar usuarios del tenant | — | — | — | — | — | ✅ | — |
+| Ver auditoría | — | — | — | ✅ (propio) | ✅ (propio) | ✅ | ✅ |
+| Operar grilla salarial | — | — | — | — | — | — | ✅ |
+| Calcular / cerrar liquidaciones | — | — | — | — | — | — | ✅ |
+| Gestionar facturas | — | — | — | — | — | — | ✅ |
+| Configurar el tenant | — | — | — | — | — | ✅ | — |
+
+> **PA-25 (resuelta)**: NEXO es un rol de **enlace administrativo-pedagógico** entre la coordinación institucional y los docentes de una regional o programa. Tiene acceso de lectura a datos de alumnos de su scope (propio), puede gestionar encuentros y guardias propias, y ver auditoría de su scope. No puede gestionar equipos docentes ni publicar avisos. Un usuario **puede** ser NEXO y COORDINADOR simultáneamente (roles no excluyentes). Su tratamiento contable es diferenciado (ver RN-36).
 
 > ⚠️ Esta matriz es el **punto de partida** del diseño de permisos. El equipo de implementación debe modelarla como datos (catálogo rol × permiso administrable), no hardcodearla.
 

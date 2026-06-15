@@ -1,4 +1,4 @@
-from sqlalchemy import Index, String, UniqueConstraint
+from sqlalchemy import Index, String, UniqueConstraint, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -11,6 +11,7 @@ class Materia(BaseModelMixin, Base):
     codigo: Mapped[str] = mapped_column(String(20), nullable=False)
     nombre: Mapped[str] = mapped_column(String(200), nullable=False)
     estado: Mapped[str] = mapped_column(String(20), nullable=False, default="Activa")
+    grupo_plus: Mapped[str | None] = mapped_column(String(50), nullable=True, default=None)
 
     __table_args__ = (
         UniqueConstraint("tenant_id", "codigo", name="uq_materia_codigo"),
@@ -19,6 +20,6 @@ class Materia(BaseModelMixin, Base):
             "tenant_id",
             "codigo",
             unique=True,
-            postgresql_where=BaseModelMixin.deleted_at.is_(None),
+            postgresql_where=text("deleted_at IS NULL"),
         ),
     )

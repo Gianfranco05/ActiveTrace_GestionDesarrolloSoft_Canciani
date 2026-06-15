@@ -1,12 +1,11 @@
-from typing import TypeVar, Optional
-
-from sqlalchemy import select
-
-from app.repositories.base import BaseRepository
-from app.models.usuario import Usuario
 import uuid
+from typing import TypeVar
+
+from sqlalchemy import insert, select
+
 from app.models.auth_user import AuthUser
-from sqlalchemy import insert
+from app.models.usuario import Usuario
+from app.repositories.base import BaseRepository
 
 T = TypeVar("T")
 
@@ -16,7 +15,7 @@ class UsuarioRepository(BaseRepository[Usuario]):
     Additional helpers can be added here (get_by_legajo, get_by_cuil, etc.).
     """
 
-    async def get_by_legajo(self, legajo: str) -> Optional[Usuario]:
+    async def get_by_legajo(self, legajo: str) -> Usuario | None:
         query = select(Usuario).where(
             Usuario.tenant_id == self._tenant_id,
             Usuario.legajo == legajo,

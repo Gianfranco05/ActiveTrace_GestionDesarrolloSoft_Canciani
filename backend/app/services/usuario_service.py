@@ -1,8 +1,9 @@
-from app.repositories.usuario_repository import UsuarioRepository
-from app.repositories.auth_repository import AuthRepository
-from app.core.security import encrypt_or_none, decrypt_or_none, hash_password
 import uuid
 from typing import Any
+
+from app.core.security import decrypt_or_none, encrypt_or_none, hash_password
+from app.repositories.auth_repository import AuthRepository
+from app.repositories.usuario_repository import UsuarioRepository
 
 
 class UsuarioService:

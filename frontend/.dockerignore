@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.husky
+README.md
+.env
+.env.local
+*.test.ts
+*.test.tsx

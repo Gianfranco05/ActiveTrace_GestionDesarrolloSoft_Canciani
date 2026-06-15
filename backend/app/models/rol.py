@@ -1,4 +1,4 @@
-from sqlalchemy import Index, String, Text, UniqueConstraint
+from sqlalchemy import Index, String, Text, UniqueConstraint, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -17,6 +17,6 @@ class Rol(BaseModelMixin, Base):
             "ix_rol_nombre_active",
             "tenant_id",
             "nombre",
-            postgresql_where=BaseModelMixin.deleted_at.is_(None),
+            postgresql_where=text("deleted_at IS NULL"),
         ),
     )

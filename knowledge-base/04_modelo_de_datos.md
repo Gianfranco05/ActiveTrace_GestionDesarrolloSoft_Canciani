@@ -39,13 +39,13 @@ Carrera {
 
 ### E2 — Cohorte
 
-Representa una cohorte (camada / ingreso) de estudiantes dentro de una carrera.
+Representa una cohorte (camada / ingreso) de estudiantes dentro de una carrera. **(PA-07: resuelta — las cohortes pertenecen a UNA carrera específica; no son transversales)**. Un alumno puede estar en cohortes de distintas carreras si cursa más de una. La cohorte define el ciclo lectivo de esa carrera en particular.
 
 ```
 Cohorte {
   id          : UUID       — clave interna
   tenant_id   : UUID       — FK → Tenant
-  carrera_id  : UUID       — FK → Carrera
+  carrera_id  : UUID       — FK → Carrera (obligatoria; cohorte siempre pertenece a una carrera)
   nombre      : texto      — denominación legible (ej: "AGO-2025", "MAR-2026")
   anio        : entero     — año de inicio
   vig_desde   : fecha      — inicio de vigencia
@@ -56,12 +56,13 @@ Cohorte {
 
 **Reglas**:
 - El par `(tenant_id, carrera_id, nombre)` es único.
+- Una cohorte pertenece a exactamente una carrera. No existen cohortes compartidas entre carreras.
 
 ---
 
 ### E3 — Materia
 
-Unidad del catálogo académico del tenant. Es la referencia única para todos los módulos que operan sobre materias (calificaciones, encuentros, guardias, etc.).
+Unidad del catálogo académico del tenant. Es la referencia única para todos los módulos que operan sobre materias (calificaciones, encuentros, guardias, etc.). No existe una entidad separada `InstanciaDictado`: la misma entidad `Materia` cubre tanto el identificador del plan de estudios (vía `codigo`) como el nombre descriptivo de la instancia de cursado (vía `nombre`). La relación con carreras y cohortes se modela a través de `Asignacion` (E5). **(PA-01: resuelta — catálogo único, una sola entidad)**.
 
 ```
 Materia {
@@ -69,6 +70,7 @@ Materia {
   tenant_id   : UUID       — FK → Tenant
   codigo      : texto      — código único dentro del tenant (ej: "PROG_I")
   nombre      : texto      — nombre completo (ej: "Programación I")
+  grupo_plus  : texto      — clave de categoría para Plus salarial (nullable; ej: "PROG", "BD"). Configurable por tenant. (PA-22)
   estado      : enum       — Activa | Inactiva
 }
 ```
@@ -76,6 +78,7 @@ Materia {
 **Reglas**:
 - El par `(tenant_id, codigo)` es único.
 - Una misma materia puede pertenecer a distintas carreras y cohortes a través de la entidad Asignación (E5).
+- `grupo_plus` es un campo de configuración por tenant: el ADMIN define qué materias pertenecen a qué grupo de Plus. Materias sin `grupo_plus` no generan Plus salarial. **(PA-22: resuelta — mapeo configurable por tenant, no hardcodeado)**.
 
 ---
 
@@ -446,13 +449,13 @@ SalarioBase {
 
 ### E18 — Plus salarial
 
-Complemento adicional al salario base, por grupo de materias y rol.
+Complemento adicional al salario base, por grupo de materias y rol. La clave `grupo` se corresponde con el campo `grupo_plus` de `Materia` (E3): el mapeo materia→grupo es configurable por tenant. **(PA-22: resuelta)**.
 
 ```
 SalarioPlus {
   id          : UUID       — clave interna
   tenant_id   : UUID       — FK → Tenant
-  grupo       : texto      — clave del grupo de materias (ej: "PROG", "BD")
+  grupo       : texto      — clave del grupo de materias (ej: "PROG", "BD"); coincide con Materia.grupo_plus
   rol         : enum       — PROFESOR | TUTOR | NEXO | COORDINADOR
   descripcion : texto      — descripción legible del plus
   monto       : decimal
@@ -462,8 +465,8 @@ SalarioPlus {
 ```
 
 **Reglas**:
-- Un docente puede acumular plus de distintos grupos si dicta materias de varios de ellos.
-- La clave `grupo` mapea a un conjunto de materias (definido en configuración del tenant).
+- Un docente acumula Plus por cada comisión de materias del mismo grupo: `N_comisiones × Plus(grupo, rol)`. **(PA-23: resuelta — acumulación lineal por comisión, sin tope; ver RN-33 y RN-34)**.
+- La clave `grupo` mapea a materias cuyo campo `grupo_plus` coincide con este valor.
 
 ---
 

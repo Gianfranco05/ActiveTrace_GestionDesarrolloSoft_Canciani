@@ -6,78 +6,7 @@
 
 ## Prioridad ALTA — bloqueantes para el modelo de dominio
 
-### PA-01 — ¿Cómo se organiza el catálogo de materias y cuál es la fuente de verdad?
-
-El sistema parece operar con (al menos) dos agrupaciones distintas de materias:
-
-- Una lista con códigos cortos del tipo `PROG_I`, `AYSO`, etc., ligada a la estructura de carreras y cohortes.
-- Otra lista con nombres descriptivos del tipo "Programación – Python", "Programación – Java", orientada al seguimiento de actividades de aprendizaje.
-
-**Preguntas abiertas**:
-
-- ¿Son dos catálogos independientes (uno por carrera/plan y otro por instancia de dictado) o es una sola entidad con distintas vistas?
-- ¿Existe una relación formal entre ambas agrupaciones? Si un alumno tiene una calificación en "Programación – Python", ¿a qué materia del plan corresponde?
-- ¿Cuál de las dos representa la materia a efectos del plan de estudios y cuál representa la instancia de cursado?
-- ¿Las calificaciones viajan entre una y otra, o cada una tiene su propio registro?
-
-**Impacto**: define si el modelo de datos necesita una entidad `Materia` (del plan) y una entidad separada `InstanciaDictado` (o `Comisión` extendida), o si alcanza con una sola.
-
----
-
-### PA-07 — ¿Las cohortes pertenecen a una carrera o son transversales?
-
-Las cohortes (ej.: "MAR-2026") pueden pertenecer a una carrera específica o ser compartidas entre varias.
-
-**Preguntas abiertas**:
-
-- ¿Una cohorte es exclusiva de un programa académico?
-- ¿Puede un alumno estar en la misma cohorte con materias de distintas carreras?
-- ¿La cohorte define el ciclo lectivo o también el plan de estudios vigente?
-
-**Impacto**: afecta la cardinalidad entre `Cohorte`, `Carrera` y `Alumno` en el modelo de datos ([04_modelo_de_datos.md](04_modelo_de_datos.md)).
-
----
-
-### PA-22 — ¿Cuántas claves de Plus existen y cómo se mapean a materias?
-
-El modelo de liquidación define un **Plus** por combinación `(clave, rol)`, donde la clave agrupa familias de materias (ej.: `PROG` para materias de Programación). Ver [RN-31](05_reglas_de_negocio.md#rn-31) a [RN-38](05_reglas_de_negocio.md#rn-38).
-
-**Preguntas abiertas**:
-
-- ¿Cuáles son todas las claves de Plus que existen en el dominio (ej.: `PROG`, `BD`, `ING`, `MAT`, etc.)?
-- ¿Qué materia cae en qué clave? ¿Hay materias sin clave asignada?
-- ¿Ese mapeo es configurable por tenant o está fijo para toda la plataforma?
-- ¿Lo define el ADMIN del tenant o viene preconfigurado desde la institución?
-
----
-
-### PA-23 — ¿Cómo se calcula el Plus cuando un docente tiene N comisiones de la misma clave?
-
-Si un PROFESOR tiene tres comisiones de materias que caen bajo la clave `PROG`:
-
-**Preguntas abiertas**:
-
-- ¿Se acumula `3 × Plus(PROG, PROFESOR)` o se aplica una sola vez sin importar la cantidad de comisiones?
-- ¿Existe un tope de acumulación?
-- ¿La lógica cambia según el rol (TUTOR vs. PROFESOR vs. COORDINADOR)?
-
-**Impacto**: es la regla de negocio central del módulo de liquidaciones. Sin ella no se puede implementar el cálculo.
-
----
-
-### PA-25 — ¿Cuál es la semántica precisa del rol NEXO?
-
-El rol NEXO existe en el dominio, tiene tratamiento contable propio y aparece en el catálogo de roles, pero su función operativa no está completamente especificada.
-
-**Preguntas abiertas**:
-
-- ¿Un NEXO está asociado a una regional, a un programa, a un grupo de docentes, o a un grupo de alumnos?
-- ¿Tiene acceso a datos de alumnos? ¿A qué granularidad?
-- ¿Puede asignar o reasignar docentes a comisiones?
-- ¿Su función es principalmente de enlace administrativo o también pedagógico?
-- ¿Un usuario puede ser NEXO y COORDINADOR al mismo tiempo?
-
-**Impacto**: define qué permisos incluir en el rol NEXO dentro de la matriz de autorización ([03_actores_y_roles.md](03_actores_y_roles.md)).
+> **Todas las preguntas de prioridad ALTA fueron resueltas** el 2026-06-08. Las resoluciones están documentadas en los archivos temáticos correspondientes. Ver tabla de "Decisiones ya cerradas" al final de este documento.
 
 ---
 
@@ -239,10 +168,15 @@ Las siguientes preguntas que existían en versiones anteriores de este documento
 
 | Código original | Resolución | Dónde está documentado |
 |-----------------|-----------|------------------------|
+| PA-01 | Catálogo único de materias: una sola entidad `Materia` cubre tanto el código del plan (`codigo`) como el nombre descriptivo (`nombre`). No existe `InstanciaDictado` separada. La relación con carreras/cohortes se modela vía `Asignacion`. | [04_modelo_de_datos.md §E3](04_modelo_de_datos.md) |
 | PA-02 | El rol TUTOR existe formalmente en el catálogo; ver descripción de capacidades | [03_actores_y_roles.md](03_actores_y_roles.md) |
 | PA-04 | Login por email + contraseña; 2FA opcional (TOTP); recuperación por token de un solo uso; alta solo administrativa en MVP | [07_flujos_principales.md](07_flujos_principales.md), [`docs/ARQUITECTURA.md` §5.1](../docs/ARQUITECTURA.md) |
 | PA-06 | Fórmula de liquidación: Base (por rol) + Plus (por clave × rol); ver RN-31 a RN-38 | [05_reglas_de_negocio.md](05_reglas_de_negocio.md) |
+| PA-07 | Las cohortes pertenecen a UNA carrera específica (no transversales). `carrera_id` es obligatoria. Un alumno puede estar en cohortes de distintas carreras si cursa más de una. | [04_modelo_de_datos.md §E2](04_modelo_de_datos.md) |
 | PA-21 | Impersonación via parámetro de petición: eliminada. La impersonación legítima requiere permiso explícito, sesión diferenciada y auditoría completa | [03_actores_y_roles.md §4](03_actores_y_roles.md), [`docs/ARQUITECTURA.md`](../docs/ARQUITECTURA.md) |
+| PA-22 | Las claves de Plus son configurables por tenant (no hardcodeadas). El mapeo materia→grupo se almacena en `Materia.grupo_plus` (campo nullable). El ADMIN define el mapeo. Materias sin `grupo_plus` no generan Plus. | [04_modelo_de_datos.md §E3 y §E18](04_modelo_de_datos.md) |
+| PA-23 | Acumulación lineal por comisión: `N_comisiones × Plus(grupo, rol)`. Sin tope. Misma lógica para todos los roles. Ya estaba definida en RN-33 y RN-34. | [05_reglas_de_negocio.md RN-33](05_reglas_de_negocio.md), [04_modelo_de_datos.md §E18](04_modelo_de_datos.md) |
+| PA-25 | NEXO es un rol de enlace administrativo-pedagógico. Acceso de lectura a datos de alumnos (propio), encuentros y guardias propias, auditoría propia. No gestiona equipos ni publica avisos. Puede ser simultáneo con COORDINADOR. | [03_actores_y_roles.md §3.3](03_actores_y_roles.md) |
 
 ---
 

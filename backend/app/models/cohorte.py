@@ -1,7 +1,7 @@
 import uuid
 from datetime import date
 
-from sqlalchemy import Date, ForeignKey, Index, Integer, String, UniqueConstraint
+from sqlalchemy import Date, ForeignKey, Index, Integer, String, UniqueConstraint, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -32,6 +32,6 @@ class Cohorte(BaseModelMixin, Base):
             "carrera_id",
             "nombre",
             unique=True,
-            postgresql_where=BaseModelMixin.deleted_at.is_(None),
+            postgresql_where=text("deleted_at IS NULL"),
         ),
     )

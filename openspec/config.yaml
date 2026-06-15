@@ -1,0 +1,81 @@
+schema: spec-driven
+
+# Project context
+context: |
+  **activia-trace** es una plataforma de gestión académica y trazabilidad multi-tenant
+  que opera como capa de orquestación sobre Moodle: consolida calificaciones, detecta
+  atrasos, gestiona comunicación saliente con aprobación, equipos docentes, encuentros,
+  coloquios, liquidaciones de honorarios y auditoría completa. Cada institución es un
+  tenant aislado; el nombre del producto es *trace* — todo audita.
+
+  ## Stack Tecnológico
+
+  ### Backend
+  - **Python 3.13** — snake_case en todo
+  - **FastAPI** — API REST async
+  - **SQLAlchemy 2.0** (async) — queries SOLO en repositories
+  - **Alembic** — una migración por cambio de schema
+  - **PostgreSQL** — JSONB para criterios/scores configurables
+  - **Pydantic v2** — DTOs request/response; `extra='forbid'`
+  - **JWT** (access corto + refresh rotation) + **Argon2id** para hashing de passwords
+  - **AES-256** para cifrado en reposo de PII sensible (CBU, DNI) y secretos
+  - **Worker async** para cola de comunicaciones
+  - **N8N** + **Moodle Web Services** para integraciones
+  - **pytest** + coverage (≥80% líneas, ≥90% reglas de negocio)
+
+  ### Frontend
+  - **React 18** + **TypeScript** — sin `any`, sin class components
+  - **Vite** como bundler
+  - **TanStack Query** para server state
+  - **React Hook Form + Zod** para formularios
+  - **Tailwind CSS** para estilos
+  - **Axios** con cliente HTTP centralizado
+  - Estructura **feature-based**: `features/{name}/{components,hooks,services,types,pages}`
+
+  ### Infraestructura
+  - **Docker** + docker-compose
+  - **Easypanel** para deploy
+  - Logs estructurados JSON + **OpenTelemetry**
+
+  ## Convenciones
+  - Conventional Commits: `tipo(scope): mensaje` (sin Co-Authored-By)
+  - Scopes: auth, tenancy, users, alumnos, materias, comisiones, entregas, comunicacion,
+    equipos, encuentros, coloquios, liquidaciones, auditoria, moodle, padron, api, ui
+  - snake_case en Python (funciones, variables, columnas, módulos)
+  - PascalCase en componentes React (nombre del componente = nombre del archivo)
+  - ≤500 LOC por archivo backend, <200 LOC por componente React
+  - Nunca lógica de negocio en Routers (flujo: Routers → Services → Repositories → Models)
+  - Soft delete siempre (auditoría append-only), nunca hard delete
+
+  ## Arquitectura
+  - Clean Architecture: routers/, services/, repositories/, models/, schemas/, core/,
+    integrations/, workers/
+  - Multi-tenancy row-level: tenant_id en cada tabla, repositories filtran por tenant
+  - RBAC fino `modulo:accion`, fail-closed (sin permiso explícito → 403)
+  - Identidad siempre desde JWT verificado, nunca de parámetros de request
+  - Secretos y PII siempre cifrados AES-256, passwords con Argon2id
+
+  ## Roles del dominio
+  ALUMNO · TUTOR · PROFESOR · COORDINADOR · NEXO · ADMIN · FINANZAS
+
+  ## Base de conocimiento
+  La fuente de verdad del dominio está en `knowledge-base/` (11 archivos).
+  El detalle técnico está en `docs/ARQUITECTURA.md`.
+
+# Per-artifact rules
+rules:
+  proposal:
+    - Mantener propuestas concisas (<500 palabras)
+    - Incluir sección "Non-goals"
+    - Referenciar la KB relevante (knowledge-base/XX_*.md)
+  design:
+    - Respetar Clean Architecture (Routers → Services → Repositories → Models)
+    - Backend: ≤500 LOC por archivo
+    - Frontend: componentes <200 LOC, estructura feature-based
+  tasks:
+    - Tasks atómicas de max 2 horas
+    - Cada task debe referenciar un escenario de spec
+    - Incluir tests como tasks explícitas
+  specs:
+    - Usar formato Given/When/Then para escenarios
+    - Cada spec debe cubrir happy path + edge cases + errores

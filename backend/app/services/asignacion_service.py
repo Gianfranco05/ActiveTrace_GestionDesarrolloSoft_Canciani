@@ -6,6 +6,8 @@ from datetime import date, datetime
 from fastapi import HTTPException
 from sqlalchemy import select
 
+from app.core.tenant_aware import get_tenant_scoped
+
 from app.models.asignacion import Asignacion
 from app.repositories.asignacion_repository import AsignacionRepository
 from app.schemas.asignaciones import AsignacionCreate, AsignacionUpdate
@@ -37,34 +39,35 @@ class AsignacionService:
         return await self._repo.list(**filters)
 
     async def _validate_fk_refs(self, data: AsignacionCreate) -> None:
-        from app.models.usuario import Usuario
         from app.models.rol import Rol
+        from app.models.usuario import Usuario
 
         session = self._repo._session
+        tenant_id = self._repo._tenant_id
 
-        usuario = await session.get(Usuario, data.usuario_id)
+        usuario = await get_tenant_scoped(session, Usuario, data.usuario_id, tenant_id)
         if usuario is None:
             raise HTTPException(status_code=404, detail="Usuario not found")
 
-        rol = await session.get(Rol, data.rol_id)
+        rol = await get_tenant_scoped(session, Rol, data.rol_id, tenant_id)
         if rol is None:
             raise HTTPException(status_code=404, detail="Rol not found")
 
         if data.materia_id is not None:
             from app.models.materia import Materia
-            materia = await session.get(Materia, data.materia_id)
+            materia = await get_tenant_scoped(session, Materia, data.materia_id, tenant_id)
             if materia is None:
                 raise HTTPException(status_code=404, detail="Materia not found")
 
         if data.carrera_id is not None:
             from app.models.carrera import Carrera
-            carrera = await session.get(Carrera, data.carrera_id)
+            carrera = await get_tenant_scoped(session, Carrera, data.carrera_id, tenant_id)
             if carrera is None:
                 raise HTTPException(status_code=404, detail="Carrera not found")
 
         if data.cohorte_id is not None:
             from app.models.cohorte import Cohorte
-            cohorte = await session.get(Cohorte, data.cohorte_id)
+            cohorte = await get_tenant_scoped(session, Cohorte, data.cohorte_id, tenant_id)
             if cohorte is None:
                 raise HTTPException(status_code=404, detail="Cohorte not found")
 
@@ -94,7 +97,6 @@ class AsignacionService:
         vig_desde: date,
         vig_hasta: date | None,
     ) -> list:
-        today = date.today()
         query = (
             select(Asignacion)
             .where(
@@ -102,9 +104,9 @@ class AsignacionService:
                 Asignacion.usuario_id == usuario_id,
                 Asignacion.rol_id == rol_id,
                 Asignacion.deleted_at.is_(None),
-                Asignacion.materia_id.is_(materia_id),
-                Asignacion.carrera_id.is_(carrera_id),
-                Asignacion.cohorte_id.is_(cohorte_id),
+                Asignacion.materia_id == materia_id if materia_id is not None else Asignacion.materia_id.is_(None),
+                Asignacion.carrera_id == carrera_id if carrera_id is not None else Asignacion.carrera_id.is_(None),
+                Asignacion.cohorte_id == cohorte_id if cohorte_id is not None else Asignacion.cohorte_id.is_(None),
             )
         )
         result = await self._repo._session.execute(query)

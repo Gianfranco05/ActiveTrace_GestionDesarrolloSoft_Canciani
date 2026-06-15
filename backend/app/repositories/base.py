@@ -1,17 +1,15 @@
 import copy
 import uuid
-from datetime import datetime, timezone
-from typing import Generic, Self, TypeVar
+from datetime import UTC, datetime
+from typing import Self
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.base import BaseModelMixin
 
-T = TypeVar("T", bound=BaseModelMixin)
 
-
-class BaseRepository(Generic[T]):
+class BaseRepository[T: BaseModelMixin]:
     def __init__(
         self,
         session: AsyncSession,
@@ -70,7 +68,7 @@ class BaseRepository(Generic[T]):
         entity = await self.get(id)
         if entity is None:
             return False
-        entity.deleted_at = datetime.now(timezone.utc)
+        entity.deleted_at = datetime.now(UTC)
         await self._session.commit()
         return True
 

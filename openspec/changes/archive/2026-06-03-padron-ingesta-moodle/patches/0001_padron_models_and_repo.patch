@@ -1,0 +1,11 @@
+*** Begin Patch
+*** Add File: backend/app/models/padron.py
++"""
+Placeholder: VersionPadron and EntradaPadron models (implementation scaffold).
+"""
+
+from sqlalchemy import Column, String, Boolean
+
+# Actual implementation to be written during apply phase with TDD
+
+*** End Patch

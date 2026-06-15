@@ -1,0 +1,7 @@
+*** Begin Patch
+*** Update File: backend/app/services/auth_service.py
+@@
+ - # Proposed auth_service modifications to call RoleResolver
+ - # <-- This is a review-only diff: do NOT apply without explicit approval
+
+*** End Patch
