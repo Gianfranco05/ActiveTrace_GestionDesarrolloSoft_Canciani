@@ -58,8 +58,8 @@ jobs:
       - name: Run tests with coverage
         env:
           DATABASE_URL: "postgresql+asyncpg://postgres:1234@localhost:5432/activia_trace_test"
-          SECRET_KEY: "a"
-          ENCRYPTION_KEY: "b"
+          SECRET_KEY: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ENCRYPTION_KEY: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
         run: uv run pytest -q --cov=app --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=80
 
       - name: Upload coverage report
