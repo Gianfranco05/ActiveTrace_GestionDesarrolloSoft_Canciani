@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api/auditoria", tags=["auditoria"])
 
 # TODO: when RBAC supports scope attributes, refactor is_global_scope
 # to query permiso.scope instead of checking role names.
-GLOBAL_SCOPE_ROLES = {"ADMIN", "FINANZAS", "COORDINADOR"}
+GLOBAL_SCOPE_ROLES = {"ADMIN", "FINANZAS"}
 
 
 def _is_global_scope(current_user: UserSession) -> bool:

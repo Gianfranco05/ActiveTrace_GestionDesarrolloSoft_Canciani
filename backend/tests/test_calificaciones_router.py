@@ -63,14 +63,17 @@ async def _seed_permisos_completos(db_session, tenant) -> Rol:
     db_session.add(rol)
     permiso_cargar = Permiso(codigo="calificaciones:cargar")
     permiso_ver = Permiso(codigo="calificaciones:ver")
-    db_session.add_all([permiso_cargar, permiso_ver])
+    permiso_importar = Permiso(codigo="calificaciones:importar")
+    db_session.add_all([permiso_cargar, permiso_ver, permiso_importar])
     await db_session.commit()
     await db_session.refresh(rol)
     await db_session.refresh(permiso_cargar)
     await db_session.refresh(permiso_ver)
+    await db_session.refresh(permiso_importar)
     db_session.add_all([
         RolPermiso(rol_id=rol.id, permiso_id=permiso_cargar.id),
         RolPermiso(rol_id=rol.id, permiso_id=permiso_ver.id),
+        RolPermiso(rol_id=rol.id, permiso_id=permiso_importar.id),
     ])
     await db_session.commit()
     return rol

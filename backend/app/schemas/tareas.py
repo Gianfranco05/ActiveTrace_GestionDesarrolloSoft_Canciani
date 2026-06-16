@@ -13,7 +13,7 @@ class EstadoTarea(StrEnum):
 
 
 class TareaCreateRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", validate_default=True)
 
     titulo: str = Field(default="", min_length=1, max_length=200)
     materia_id: uuid.UUID | None = Field(default=None)
