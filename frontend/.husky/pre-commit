@@ -1,2 +1,2 @@
 (cd frontend && npx lint-staged)
-(cd backend && ruff check . --fix || exit 0)
+(cd backend && ruff check . --fix || true)
