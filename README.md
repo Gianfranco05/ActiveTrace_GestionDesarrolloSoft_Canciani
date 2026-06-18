@@ -14,6 +14,9 @@ Gestión de Desarrollo de Software
 
 Plataforma de gestión académica y trazabilidad **multi-tenant** que opera como capa de orquestación sobre Moodle. Consolida calificaciones, detecta atrasos, gestiona comunicación saliente con aprobación, equipos docentes, encuentros, coloquios, liquidaciones de honorarios y auditoría completa. Cada institución es un tenant aislado.
 
+# Link Video
+https://youtu.be/qT7WFFRxaUM?si=rd8oJGCMV3nlp1Cb 
+
 ---
 
 ## Stack
